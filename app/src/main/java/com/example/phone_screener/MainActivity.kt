@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.phone_screener.ui.theme.Phone_screenerTheme
+import android.app.role.RoleManager
 import androidx.compose.material.icons.filled.Person // NEW: Icon for contacts
 
 
@@ -68,6 +69,15 @@ fun DialerScreen() {
             if (selectedNumber != null) {
                 phoneNumber = selectedNumber
             }
+        }
+    }
+    val roleRequestLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "App set as default phone app!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Failed to set as default phone app.", Toast.LENGTH_SHORT).show()
         }
     }
     // NEW: Launcher for contact permission request
@@ -176,6 +186,13 @@ fun DialerScreen() {
                 }
             }) {
                 Icon(Icons.Default.Delete, contentDescription = "Backspace", modifier = Modifier.size(32.dp))
+            }
+            Button(onClick = {
+                val roleManager = context.getSystemService(Context.ROLE_SERVICE) as RoleManager
+                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
+                roleRequestLauncher.launch(intent)
+            }) {
+                Text("Set as Default Phone App")
             }
         }
     }
